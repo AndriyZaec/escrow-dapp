@@ -1,0 +1,45 @@
+# OS files
+.DS_Store
+
+# Node and build output
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor files
+.idea/
+.vscode/
+
+# Local Claude and agent artifacts
+.claude/
+
+# Other agent folders
+.cursor/
+.windsurf/
+.continue/
+.roo/
+.aider*
+.opencode/
+.qodo/
+.gemini/
+
+# Solana local artifacts
+.anchor/
+target/
+test-ledger/
+.localnet/
