@@ -8,7 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@generated': path.resolve(__dirname, './src/generated/src/generated'),
+      '@generated': path.resolve(__dirname, './src/generated'),
     },
   },
   define: { global: 'globalThis' },
