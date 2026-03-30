@@ -38,7 +38,7 @@ export function EscrowPanel({ balances }: EscrowPanelProps) {
         error={offersError}
         onRefresh={fetchOffers}
         wallet={wallet}
-        onTakeSuccess={fetchOffers}
+        onTakeSuccess={() => { fetchOffers(); balances.refetch(); }}
         allPlatforms={allPlatforms}
         setAllPlatforms={setAllPlatforms}
       />

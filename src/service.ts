@@ -1,11 +1,11 @@
-import { address, type TransactionSigner } from '@solana/kit';
-import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
-import { getMakeOfferInstructionAsync } from '@generated/instructions/makeOffer';
-import { getTakeOfferInstructionAsync } from '@generated/instructions/takeOffer';
-import { findOfferPda } from '@generated/pdas/offer';
-import { executeTransaction } from '@/lib/execute';
-import { saveOffer, markOfferTaken } from '@/lib/supabase';
-import type { OnChainOffer } from '@/hooks/useOffers';
+import { address, type TransactionSigner } from "@solana/kit";
+import { TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
+import { getMakeOfferInstructionAsync } from "@generated/instructions/makeOffer";
+import { getTakeOfferInstructionAsync } from "@generated/instructions/takeOffer";
+import { findOfferPda } from "@generated/pdas/offer";
+import { executeTransaction } from "@/lib/execute";
+import { saveOffer, markOfferTaken } from "@/lib/supabase";
+import type { OnChainOffer } from "@/hooks/useOffers";
 
 export interface MakeOfferParams {
   mintA: string;
@@ -19,7 +19,8 @@ export async function makeOffer(
   params: MakeOfferParams,
   signer: TransactionSigner,
 ): Promise<string> {
-  const { mintA, mintB, offerId, tokenAOfferedAmount, tokenBWantedAmount } = params;
+  const { mintA, mintB, offerId, tokenAOfferedAmount, tokenBWantedAmount } =
+    params;
 
   const ix = await getMakeOfferInstructionAsync({
     maker: signer,
@@ -49,7 +50,7 @@ export async function makeOffer(
       tx_sig: txSig,
     });
   } catch (e) {
-    console.warn('Supabase save failed (offer is on-chain):', e);
+    console.warn("Supabase save failed (offer is on-chain):", e);
   }
 
   return txSig;
@@ -78,7 +79,7 @@ export async function takeOffer(
   try {
     await markOfferTaken(offer.pda);
   } catch (e) {
-    console.warn('Supabase update failed (offer is taken on-chain):', e);
+    console.warn("Supabase update failed (offer is taken on-chain):", e);
   }
 
   return txSig;

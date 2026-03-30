@@ -5,7 +5,6 @@ export interface TokenBalance {
   symbol: string;
   name: string;
   logoURI: string | null;
-  balance: number;
   rawBalance: bigint;
   decimals: number;
 }
@@ -27,12 +26,18 @@ export async function fetchTokenBalances(owner: string): Promise<TokenBalance[]>
     }),
   });
 
-  const json = await resp.json() as {
+  // Parse raw text with regex replacement to preserve large integer precision.
+  // Helius returns balance as a JSON number (e.g. 1000000000000) which JS parses
+  // as float64, losing precision beyond 2^53. We convert balance values to strings
+  // before JSON.parse sees them.
+  const text = await resp.text();
+  const safeText = text.replace(/"balance"\s*:\s*(\d+)/g, '"balance":"$1"');
+  const json = JSON.parse(safeText) as {
     result?: {
       items?: Array<{
         id: string;
         content?: { metadata?: { symbol?: string; name?: string }; links?: { image?: string } };
-        token_info?: { balance?: number; decimals?: number };
+        token_info?: { balance?: string; decimals?: number };
       }>;
     };
   };
@@ -40,16 +45,18 @@ export async function fetchTokenBalances(owner: string): Promise<TokenBalance[]>
   const items = json.result?.items ?? [];
 
   return items
-    .filter(item => (item.token_info?.balance ?? 0) > 0)
+    .filter(item => {
+      const b = item.token_info?.balance;
+      return b !== undefined && b !== '0' && b !== '';
+    })
     .map(item => {
       const decimals = item.token_info?.decimals ?? 0;
-      const rawBalance = BigInt(Math.round(item.token_info?.balance ?? 0));
+      const rawBalance = BigInt(item.token_info?.balance ?? '0');
       return {
         mint: item.id,
         symbol: item.content?.metadata?.symbol ?? item.id.slice(0, 6),
         name: item.content?.metadata?.name ?? 'Unknown Token',
         logoURI: item.content?.links?.image ?? null,
-        balance: Number(rawBalance) / 10 ** decimals,
         rawBalance,
         decimals,
       };
