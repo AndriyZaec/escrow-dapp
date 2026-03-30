@@ -3,6 +3,7 @@ import { address, getBase58Codec, type Address, type Base58EncodedBytes } from '
 import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, fetchAllMaybeToken, fetchAllMaybeMint } from '@solana-program/token';
 import { rpc } from '@/lib/rpc';
 import { fetchOpenOffersFromDb } from '@/lib/supabase';
+import { getTokenList } from '@/lib/helius';
 import { decodeOffer, OFFER_DISCRIMINATOR } from '@generated/accounts/offer';
 import { ESCROW_PROGRAM_ADDRESS } from '@generated/programs/escrow';
 
@@ -16,6 +17,8 @@ export interface OnChainOffer {
   tokenAOfferedAmount: bigint | null;
   decimalsA: number | null;
   decimalsB: number | null;
+  symbolA: string | null;
+  symbolB: string | null;
 }
 
 export function useOffers() {
@@ -93,16 +96,17 @@ export function useOffers() {
         }
       });
 
-      // Batch-fetch vault balances + mint decimals
+      // Batch-fetch vault balances + mint decimals + token symbols
       let vaultAmounts: (bigint | null)[] = parsed.map(() => null);
       const mintDecimals = new Map<string, number>();
+      let tokenList = new Map<string, { symbol: string; name: string; logoURI: string }>();
 
       if (parsed.length > 0) {
         // Collect unique mints
         const uniqueMints = [...new Set(parsed.flatMap(o => [String(o.tokenMintA), String(o.tokenMintB)]))];
 
-        // Fetch vault balances + mint decimals in parallel
-        const [, mintResults] = await Promise.all([
+        // Fetch vault balances + mint decimals + token list in parallel
+        const [, mintResults, fetchedTokenList] = await Promise.all([
           // Vault balances
           (async () => {
             try {
@@ -125,8 +129,11 @@ export function useOffers() {
           })(),
           // Mint decimals
           fetchAllMaybeMint(rpc, uniqueMints.map(m => address(m))).catch(() => null),
+          // Token list for symbols
+          getTokenList(),
         ]);
 
+        tokenList = fetchedTokenList;
         if (mintResults) {
           uniqueMints.forEach((mint, i) => {
             const acc = mintResults[i];
@@ -140,6 +147,8 @@ export function useOffers() {
         tokenAOfferedAmount: vaultAmounts[i],
         decimalsA: mintDecimals.get(String(offer.tokenMintA)) ?? null,
         decimalsB: mintDecimals.get(String(offer.tokenMintB)) ?? null,
+        symbolA: tokenList.get(String(offer.tokenMintA))?.symbol ?? null,
+        symbolB: tokenList.get(String(offer.tokenMintB))?.symbol ?? null,
       }));
 
       // Filter to only offers created through this frontend (tracked in Supabase)
