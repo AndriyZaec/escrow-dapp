@@ -3,7 +3,9 @@ import {
   createSolanaRpcSubscriptions,
   sendAndConfirmTransactionFactory,
   devnet,
+  address,
 } from '@solana/kit';
+import { fetchMaybeMint } from '@solana-program/token';
 
 const RPC_URL =
   (import.meta.env.VITE_SOLANA_RPC_URL as string) ??
