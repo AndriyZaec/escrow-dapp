@@ -62,6 +62,7 @@ export function useOffers() {
           for (let i = 0; i < raw.length; i++) dataBytes[i] = raw.charCodeAt(i);
 
           const encoded = {
+            exists: true as const,
             address: address(item.pubkey),
             data: dataBytes,
             executable: item.account.executable,
@@ -117,6 +118,7 @@ export function useOffers() {
 
       setOffers(offersWithAmounts);
     } catch (e) {
+      console.error('[useOffers] fetchOffers failed:', e);
       setError(e instanceof Error ? e.message : 'Failed to fetch offers');
     } finally {
       setLoading(false);
