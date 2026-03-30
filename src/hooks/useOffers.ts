@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { address, getBase58Codec, type Address, type Base58EncodedBytes } from '@solana/kit';
-import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, fetchAllMaybeToken } from '@solana-program/token';
+import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, fetchAllMaybeToken, fetchAllMaybeMint } from '@solana-program/token';
 import { rpc } from '@/lib/rpc';
 import { fetchOpenOffersFromDb } from '@/lib/supabase';
 import { decodeOffer, OFFER_DISCRIMINATOR } from '@generated/accounts/offer';
@@ -14,6 +14,8 @@ export interface OnChainOffer {
   tokenMintB: Address;
   tokenBWantedAmount: bigint;
   tokenAOfferedAmount: bigint | null;
+  decimalsA: number | null;
+  decimalsB: number | null;
 }
 
 export function useOffers() {
@@ -91,31 +93,53 @@ export function useOffers() {
         }
       });
 
-      // Derive vault ATAs and batch-fetch balances to get tokenAOfferedAmount
+      // Batch-fetch vault balances + mint decimals
       let vaultAmounts: (bigint | null)[] = parsed.map(() => null);
+      const mintDecimals = new Map<string, number>();
+
       if (parsed.length > 0) {
-        try {
-          const vaultAddresses = await Promise.all(
-            parsed.map(offer =>
-              findAssociatedTokenPda({
-                owner: address(offer.pda),
-                tokenProgram: TOKEN_PROGRAM_ADDRESS,
-                mint: offer.tokenMintA,
-              }).then(([addr]) => addr),
-            ),
-          );
-          const vaultAccounts = await fetchAllMaybeToken(rpc, vaultAddresses);
-          vaultAmounts = vaultAccounts.map(acc =>
-            acc.exists ? acc.data.amount : null,
-          );
-        } catch {
-          // Vault fetch failed — leave amounts as null
+        // Collect unique mints
+        const uniqueMints = [...new Set(parsed.flatMap(o => [String(o.tokenMintA), String(o.tokenMintB)]))];
+
+        // Fetch vault balances + mint decimals in parallel
+        const [, mintResults] = await Promise.all([
+          // Vault balances
+          (async () => {
+            try {
+              const vaultAddresses = await Promise.all(
+                parsed.map(offer =>
+                  findAssociatedTokenPda({
+                    owner: address(offer.pda),
+                    tokenProgram: TOKEN_PROGRAM_ADDRESS,
+                    mint: offer.tokenMintA,
+                  }).then(([addr]) => addr),
+                ),
+              );
+              const vaultAccounts = await fetchAllMaybeToken(rpc, vaultAddresses);
+              vaultAmounts = vaultAccounts.map(acc =>
+                acc.exists ? acc.data.amount : null,
+              );
+            } catch {
+              // Vault fetch failed — leave amounts as null
+            }
+          })(),
+          // Mint decimals
+          fetchAllMaybeMint(rpc, uniqueMints.map(m => address(m))).catch(() => null),
+        ]);
+
+        if (mintResults) {
+          uniqueMints.forEach((mint, i) => {
+            const acc = mintResults[i];
+            if (acc.exists) mintDecimals.set(mint, acc.data.decimals);
+          });
         }
       }
 
       let offersWithAmounts: OnChainOffer[] = parsed.map((offer, i) => ({
         ...offer,
         tokenAOfferedAmount: vaultAmounts[i],
+        decimalsA: mintDecimals.get(String(offer.tokenMintA)) ?? null,
+        decimalsB: mintDecimals.get(String(offer.tokenMintB)) ?? null,
       }));
 
       // Filter to only offers created through this frontend (tracked in Supabase)

@@ -12,7 +12,7 @@ import { makeOffer, takeOffer } from '@/service';
 import { useOffers, type OnChainOffer } from '@/hooks/useOffers';
 import { classifyError } from '@/lib/execute';
 import { fetchMintDecimals } from '@/lib/rpc';
-import { truncateAddress } from '@/lib/utils';
+import { truncateAddress, formatTokenAmount } from '@/lib/utils';
 import type { Balances } from '@/hooks/useBalance';
 
 interface EscrowPanelProps {
@@ -264,8 +264,8 @@ function OfferCard({
             <span className="font-mono text-xs text-slate-400">{truncateAddress(String(offer.maker))}</span>
           </div>
           <div className="text-xs text-slate-500 space-y-0.5">
-            <p>Offers: {offer.tokenAOfferedAmount !== null && <span className="text-slate-200">{offer.tokenAOfferedAmount.toString()} </span>}<span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintA))}</span></p>
-            <p>Wants: <span className="text-slate-200">{offer.tokenBWantedAmount.toString()} </span><span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintB))}</span></p>
+            <p>Offers: {offer.tokenAOfferedAmount !== null && <span className="text-slate-200">{offer.decimalsA !== null ? formatTokenAmount(offer.tokenAOfferedAmount, offer.decimalsA) : offer.tokenAOfferedAmount.toString()} </span>}<span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintA))}</span></p>
+            <p>Wants: <span className="text-slate-200">{offer.decimalsB !== null ? formatTokenAmount(offer.tokenBWantedAmount, offer.decimalsB) : offer.tokenBWantedAmount.toString()} </span><span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintB))}</span></p>
           </div>
         </div>
 
