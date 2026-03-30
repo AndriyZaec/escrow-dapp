@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { address, getBase58Codec, type Address, type Base58EncodedBytes } from '@solana/kit';
 import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, fetchAllMaybeToken } from '@solana-program/token';
 import { rpc } from '@/lib/rpc';
+import { fetchOpenOffersFromDb } from '@/lib/supabase';
 import { decodeOffer, OFFER_DISCRIMINATOR } from '@generated/accounts/offer';
 import { ESCROW_PROGRAM_ADDRESS } from '@generated/programs/escrow';
 
@@ -19,6 +20,7 @@ export function useOffers() {
   const [offers, setOffers] = useState<OnChainOffer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allPlatforms, setAllPlatforms] = useState(false);
 
   const fetchOffers = useCallback(async () => {
     setLoading(true);
@@ -111,10 +113,21 @@ export function useOffers() {
         }
       }
 
-      const offersWithAmounts: OnChainOffer[] = parsed.map((offer, i) => ({
+      let offersWithAmounts: OnChainOffer[] = parsed.map((offer, i) => ({
         ...offer,
         tokenAOfferedAmount: vaultAmounts[i],
       }));
+
+      // Filter to only offers created through this frontend (tracked in Supabase)
+      if (!allPlatforms) {
+        try {
+          const dbOffers = await fetchOpenOffersFromDb();
+          const knownPdas = new Set(dbOffers.map(o => o.pda));
+          offersWithAmounts = offersWithAmounts.filter(o => knownPdas.has(o.pda));
+        } catch (e) {
+          console.error('[useOffers] Supabase filter failed, showing all:', e);
+        }
+      }
 
       setOffers(offersWithAmounts);
     } catch (e) {
@@ -123,7 +136,7 @@ export function useOffers() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [allPlatforms]);
 
-  return { offers, loading, error, fetchOffers };
+  return { offers, loading, error, fetchOffers, allPlatforms, setAllPlatforms };
 }

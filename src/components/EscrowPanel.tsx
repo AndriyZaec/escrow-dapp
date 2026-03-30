@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { TxResult } from '@/components/TxResult';
 import { makeOffer, takeOffer } from '@/service';
 import { useOffers, type OnChainOffer } from '@/hooks/useOffers';
@@ -20,7 +21,7 @@ interface EscrowPanelProps {
 
 export function EscrowPanel({ balances }: EscrowPanelProps) {
   const { connected, wallet } = useWalletConnection();
-  const { offers, loading: offersLoading, error: offersError, fetchOffers } = useOffers();
+  const { offers, loading: offersLoading, error: offersError, fetchOffers, allPlatforms, setAllPlatforms } = useOffers();
 
   useEffect(() => {
     void fetchOffers();
@@ -38,6 +39,8 @@ export function EscrowPanel({ balances }: EscrowPanelProps) {
         onRefresh={fetchOffers}
         wallet={wallet}
         onTakeSuccess={fetchOffers}
+        allPlatforms={allPlatforms}
+        setAllPlatforms={setAllPlatforms}
       />
     </div>
   );
@@ -172,6 +175,8 @@ function OpenOffersList({
   onRefresh,
   wallet,
   onTakeSuccess,
+  allPlatforms,
+  setAllPlatforms,
 }: {
   offers: OnChainOffer[];
   loading: boolean;
@@ -179,14 +184,24 @@ function OpenOffersList({
   onRefresh: () => void;
   wallet: ReturnType<typeof useWalletConnection>['wallet'];
   onTakeSuccess: () => void;
+  allPlatforms: boolean;
+  setAllPlatforms: (v: boolean) => void;
 }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Open Offers</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Refresh'}
-        </Button>
+        <div className="flex items-center justify-between w-full">
+          <CardTitle>Open Offers</CardTitle>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+              <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
+              All platforms
+            </label>
+            <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
+              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Refresh'}
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
