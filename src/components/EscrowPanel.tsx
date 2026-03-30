@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useWalletConnection } from '@solana/react-hooks';
 import { createWalletTransactionSigner } from '@solana/client';
 import { Loader2, Plus, ArrowLeftRight } from 'lucide-react';
@@ -249,9 +249,8 @@ function OfferCard({
             <span className="font-mono text-xs text-slate-400">{truncateAddress(String(offer.maker))}</span>
           </div>
           <div className="text-xs text-slate-500 space-y-0.5">
-            <p>Offers: <span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintA))}</span></p>
-            <p>Wants: <span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintB))}</span></p>
-            <p>Amount wanted: <span className="text-slate-200">{offer.tokenBWantedAmount.toString()}</span></p>
+            <p>Offers: {offer.tokenAOfferedAmount !== null && <span className="text-slate-200">{offer.tokenAOfferedAmount.toString()} </span>}<span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintA))}</span></p>
+            <p>Wants: <span className="text-slate-200">{offer.tokenBWantedAmount.toString()} </span><span className="font-mono text-slate-300">{truncateAddress(String(offer.tokenMintB))}</span></p>
           </div>
         </div>
 
