@@ -70,7 +70,7 @@ export function WalletButton() {
   // ── Single wallet ─────────────────────────────────────────────────────────────
   if (connectors.length === 1) {
     return (
-      <Button onClick={() => connect(connectors[0])}>
+      <Button onClick={() => connect(connectors[0].id)}>
         <Wallet className="h-4 w-4" />
         Connect Wallet
       </Button>
@@ -97,8 +97,8 @@ export function WalletButton() {
           <div className="p-1">
             {connectors.map(c => (
               <button
-                key={String(c.name)}
-                onClick={() => { connect(c); setShowPicker(false); }}
+                key={c.id}
+                onClick={() => { connect(c.id); setShowPicker(false); }}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-slate-800 transition-colors text-slate-200"
               >
                 {c.icon

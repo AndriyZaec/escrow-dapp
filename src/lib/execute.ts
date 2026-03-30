@@ -6,13 +6,13 @@ import {
   signTransactionMessageWithSigners,
   getBase58Codec,
   type TransactionSigner,
-  type IInstruction,
+  type Instruction,
 } from '@solana/kit';
 import { rpc, sendAndConfirm } from '@/lib/rpc';
 
 export async function executeTransaction(
   signer: TransactionSigner,
-  instructions: IInstruction[],
+  instructions: Instruction[],
 ): Promise<string> {
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
