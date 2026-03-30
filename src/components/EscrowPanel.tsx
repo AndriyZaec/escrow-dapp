@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWalletConnection } from '@solana/react-hooks';
 import { createWalletTransactionSigner } from '@solana/client';
 import { Loader2, Plus, ArrowLeftRight } from 'lucide-react';
@@ -10,6 +10,7 @@ import { TxResult } from '@/components/TxResult';
 import { makeOffer, takeOffer } from '@/service';
 import { useOffers, type OnChainOffer } from '@/hooks/useOffers';
 import { classifyError } from '@/lib/execute';
+import { fetchMintDecimals } from '@/lib/rpc';
 import { truncateAddress } from '@/lib/utils';
 import type { Balances } from '@/hooks/useBalance';
 
@@ -57,12 +58,26 @@ function MakeOfferForm({
   const [amountA, setAmountA] = useState('');
   const [mintB, setMintB] = useState('');
   const [amountB, setAmountB] = useState('');
+  const [mintBDecimals, setMintBDecimals] = useState<number | null>(null);
+  const [mintBLoading, setMintBLoading] = useState(false);
   const [pending, setPending] = useState(false);
   const [txSig, setTxSig] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setMintBDecimals(null);
+    if (!mintB || mintB.length < 32) return;
+    const timer = setTimeout(async () => {
+      setMintBLoading(true);
+      const decimals = await fetchMintDecimals(mintB);
+      setMintBDecimals(decimals);
+      setMintBLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [mintB]);
+
   async function handleMake() {
-    if (!wallet || !mintA || !amountA || !mintB || !amountB) return;
+    if (!wallet || !mintA || !amountA || !mintB || !amountB || mintBDecimals === null) return;
     setPending(true);
     setTxSig(null);
     setError(null);
@@ -78,7 +93,7 @@ function MakeOfferForm({
           mintB,
           offerId: BigInt(Date.now()),
           tokenAOfferedAmount: BigInt(Math.round(parseFloat(amountA) * 10 ** decimalsA)),
-          tokenBWantedAmount: BigInt(Math.round(parseFloat(amountB) * 1e6)), // assume 6 decimals for mintB
+          tokenBWantedAmount: BigInt(Math.round(parseFloat(amountB) * 10 ** (mintBDecimals ?? 6))),
         },
         signer,
       );
@@ -122,6 +137,9 @@ function MakeOfferForm({
           <div>
             <label className="mb-1 block text-xs text-slate-500">Token B mint address</label>
             <Input placeholder="Mint address" value={mintB} onChange={e => setMintB(e.target.value)} />
+            {mintBLoading && <span className="text-xs text-slate-500 mt-0.5 block">Fetching mint info…</span>}
+            {!mintBLoading && mintBDecimals !== null && <span className="text-xs text-slate-400 mt-0.5 block">{mintBDecimals} decimals</span>}
+            {!mintBLoading && mintB.length >= 32 && mintBDecimals === null && <span className="text-xs text-red-400 mt-0.5 block">Invalid or unknown mint</span>}
           </div>
           <div>
             <label className="mb-1 block text-xs text-slate-500">Amount wanted</label>
@@ -132,7 +150,7 @@ function MakeOfferForm({
         <Button
           className="w-full"
           onClick={handleMake}
-          disabled={pending || !mintA || !amountA || !mintB || !amountB}
+          disabled={pending || !mintA || !amountA || !mintB || !amountB || mintBDecimals === null}
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowLeftRight className="h-4 w-4" />}
           {pending ? 'Creating offer…' : 'Create Offer'}

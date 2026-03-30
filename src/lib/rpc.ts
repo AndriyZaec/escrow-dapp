@@ -20,3 +20,12 @@ export const sendAndConfirm = sendAndConfirmTransactionFactory({
   rpc,
   rpcSubscriptions,
 });
+
+export async function fetchMintDecimals(mint: string): Promise<number | null> {
+  try {
+    const result = await fetchMaybeMint(rpc, address(mint));
+    return result.exists ? result.data.decimals : null;
+  } catch {
+    return null;
+  }
+}

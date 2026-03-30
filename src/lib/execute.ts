@@ -28,8 +28,10 @@ export async function executeTransaction(
   );
 
   const signed = await signTransactionMessageWithSigners(message);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (sendAndConfirm as any)(signed, { commitment: 'confirmed' });
+  await sendAndConfirm(
+    signed as Parameters<typeof sendAndConfirm>[0],
+    { commitment: 'confirmed' },
+  );
 
   const [firstSig] = Object.values(signed.signatures);
   return getBase58Codec().decode(firstSig as Uint8Array);
