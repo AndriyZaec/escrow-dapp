@@ -59,7 +59,7 @@
 }
 
 /* Inputs → sunken, consistent height */
-.theme-98 input,
+.theme-98 input:not([type="checkbox"]),
 .theme-98 select,
 .theme-98 textarea {
   background: #fff !important;
@@ -70,6 +70,17 @@
   height: 28px !important;
   padding: 2px 6px !important;
   font-size: 13px !important;
+}
+
+/* Checkbox — classic 98 look */
+.theme-98 input[type="checkbox"] {
+  appearance: auto !important;
+  width: 14px !important;
+  height: 14px !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  cursor: pointer;
 }
 
 .theme-98 input::placeholder {
@@ -171,6 +182,14 @@
   background: #c0c0c0 !important;
   border: 2px inset #c0c0c0 !important;
   border-radius: 0 !important;
+}
+
+/* Clippy button — preserve transparent look */
+.theme-98 button[title*="tip"],
+.theme-98 button[title*="nostalgic"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Switch in 98 mode */

@@ -78,13 +78,13 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
     : 'Tap on me if you want to shed a tear';
 
   return (
-    <div style={{ position: 'fixed', bottom: 28, right: 32, zIndex: 50 }}>
+    <div style={{ position: 'fixed', bottom: 48, right: 48, zIndex: 50 }}>
       {/* Speech bubble */}
       {bubbleOpen && (
         <div
           style={{
             position: 'absolute',
-            bottom: 80,
+            bottom: 136,
             right: 0,
             width: 230,
             padding: '10px 12px',
@@ -100,34 +100,12 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
           }}
         >
           {bubbleText}
-          {nostalgic && (
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                setBubbleOpen(false);
-                if (timerRef.current) clearTimeout(timerRef.current);
-              }}
-              style={{
-                position: 'absolute',
-                top: 2,
-                right: 4,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 14,
-                color: '#666',
-                padding: '0 2px',
-              }}
-            >
-              x
-            </button>
-          )}
           {/* Tail */}
           <div
             style={{
               position: 'absolute',
               bottom: -8,
-              right: 22,
+              right: 52,
               width: 0,
               height: 0,
               borderLeft: '8px solid transparent',
@@ -141,7 +119,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
             style={{
               position: 'absolute',
               bottom: -6,
-              right: 23,
+              right: 53,
               width: 0,
               height: 0,
               borderLeft: '7px solid transparent',
@@ -159,8 +137,8 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
         onClick={handleClick}
         title={nostalgic ? 'Click for a tip!' : 'Enter nostalgic mode'}
         style={{
-          width: 72,
-          height: 72,
+          width: 128,
+          height: 128,
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
@@ -177,7 +155,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
         <img
           src="/clippy.png"
           alt="Clippy"
-          style={{ width: 64, height: 64, objectFit: 'contain' }}
+          style={{ width: 120, height: 120, objectFit: 'contain' }}
         />
       </button>
     </div>
