@@ -3,6 +3,7 @@ import { rpc } from '@/lib/rpc';
 
 const HELIUS_RPC = `https://devnet.helius-rpc.com/?api-key=${import.meta.env.VITE_HELIUS_API_KEY as string}`;
 const METADATA_PROGRAM = address('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
+const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json';
 
 export interface TokenBalance {
@@ -121,9 +122,14 @@ export async function fetchTokenBalances(owner: string): Promise<TokenBalance[]>
     }
   }
 
-  // Final fallback
+  // Final fallback + wSOL rename
   for (const t of tokens) {
-    if (!t.symbol) t.symbol = t.mint.slice(0, 6);
+    if (t.mint === NATIVE_SOL_MINT) {
+      t.symbol = 'wSOL';
+      t.name = 'Wrapped SOL';
+    } else if (!t.symbol) {
+      t.symbol = t.mint.slice(0, 6);
+    }
     if (!t.name) t.name = 'Unknown Token';
   }
 

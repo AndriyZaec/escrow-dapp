@@ -22,6 +22,7 @@ export interface OnChainOffer {
   decimalsB: number | null;
   symbolA: string | null;
   symbolB: string | null;
+  txSig?: string | null;
 }
 
 export function useOffers() {
@@ -188,6 +189,7 @@ export function useOffers() {
             decimalsB: mintDecimals.get(r.mint_b) ?? null,
             symbolA: tokenList.get(r.mint_a)?.symbol ?? null,
             symbolB: tokenList.get(r.mint_b)?.symbol ?? null,
+            txSig: r.tx_sig,
           }));
         } catch (e) {
           console.error('[useOffers] Taken filter failed:', e);

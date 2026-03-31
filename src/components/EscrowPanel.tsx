@@ -383,6 +383,7 @@ function OpenOffersList({
               offer={offer}
               wallet={wallet}
               onTakeSuccess={onTakeSuccess}
+              isTaken={activityFilter === "taken"}
             />
           ))}
         </div>
@@ -401,10 +402,12 @@ function OfferCard({
   offer,
   wallet,
   onTakeSuccess,
+  isTaken = false,
 }: {
   offer: OnChainOffer;
   wallet: ReturnType<typeof useWalletConnection>["wallet"];
   onTakeSuccess: () => void;
+  isTaken?: boolean;
 }) {
   const [pending, setPending] = useState(false);
   const [txSig, setTxSig] = useState<string | null>(null);
@@ -468,14 +471,20 @@ function OfferCard({
           </div>
         </div>
 
-        <Button
-          size="sm"
-          onClick={handleTake}
-          disabled={pending}
-          className="shrink-0"
-        >
-          {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Take"}
-        </Button>
+        {isTaken && offer.txSig ? (
+          <TxResult sig={offer.txSig} />
+        ) : !isTaken ? (
+          <Button
+            size="sm"
+            onClick={handleTake}
+            disabled={pending}
+            className="shrink-0"
+          >
+            {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Take"}
+          </Button>
+        ) : (
+          <Badge>Taken</Badge>
+        )}
       </div>
 
       {txSig && <TxResult sig={txSig} />}
