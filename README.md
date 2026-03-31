@@ -1,73 +1,146 @@
-# React + TypeScript + Vite
+# Escrow DApp (Solana Devnet)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Vite + React + TypeScript frontend for creating and taking escrow offers on Solana Devnet.
 
-Currently, two official plugins are available:
+This app integrates wallet connection, SOL/SPL transfers, on-chain offer discovery, Supabase-backed activity/history, and a nostalgic `98.css` theme mode.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Wallet connection via auto-discovered connectors (Phantom, Backpack, Solflare, and others supported by wallet standard).
+- SOL balance and SPL token balances after wallet connect.
+- Token metadata enrichment chain for better symbols/logos:
+  - Helius DAS metadata
+  - Solana token list fallback
+  - Metaplex metadata fallback
+- Send flow for:
+  - native SOL
+  - SPL tokens
+- Escrow flow:
+  - create offer (`makeOffer`)
+  - take offer (`takeOffer`)
+  - explorer links for confirmed transactions
+- Offers workspace UX:
+  - activity filters: `All`, `My Offers`, `Taken`
+  - `All platforms` toggle
+  - pagination (`Load more`)
+  - token symbol + decimal-aware amount display
+- Optional nostalgic mode inspired by `98.css` (toggle through Clippy).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- React 19 + TypeScript + Vite
+- Solana SDKs:
+  - `@solana/kit`
+  - `@solana/client`
+  - `@solana/react-hooks`
+  - `@solana-program/token`
+  - `@solana-program/system`
+- Codama codegen from Anchor IDL
+- Supabase (`@supabase/supabase-js`) for frontend-tracked offer records
+- Tailwind v4 + lightweight custom UI primitives
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Project Layout
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- `src/App.tsx` - shell, header, tabs, nostalgic mode entry
+- `src/components/` - wallet UI, balances, transfer, escrow panel, Clippy, UI primitives
+- `src/hooks/` - balance, transfer, offers, nostalgic-mode state
+- `src/lib/` - rpc client, solana client, transaction executor, helius integration, supabase
+- `src/service.ts` - high-level `makeOffer` / `takeOffer` orchestration
+- `src/idl/escrow.json` - source IDL
+- `src/generated/` - Codama-generated client artifacts
+- `scripts/codegen.mjs` - IDL -> generated client pipeline
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 20+
+- npm
+- A devnet wallet with test SOL
+- Helius API key
+- Supabase project (for tracked offer history/filtering)
+
+## Environment Variables
+
+Copy and fill env values:
+
+```bash
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Required values:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Variable | Purpose |
+| --- | --- |
+| `VITE_HELIUS_API_KEY` | Helius DAS + RPC key |
+| `VITE_SOLANA_RPC_URL` | Solana RPC endpoint (devnet) |
+| `VITE_SOLANA_WS_URL` | Solana WS endpoint (devnet) |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase publishable key |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Setup
+
+Install dependencies:
+
+```bash
+npm install
 ```
+
+Generate typed Solana client from IDL:
+
+```bash
+npm run codegen
+```
+
+Start dev server:
+
+```bash
+npm run dev
+```
+
+Build production bundle:
+
+```bash
+npm run build
+```
+
+Preview build locally:
+
+```bash
+npm run preview
+```
+
+## Supabase Schema
+
+This app expects an `offers` table with `status` and `taker` tracking.
+
+Use the SQL block in `src/lib/supabase.ts` and run it once in the Supabase SQL editor.
+
+## Escrow Flow Summary
+
+- `makeOffer`:
+  - builds instruction from generated Codama client
+  - sends transaction
+  - derives offer PDA
+  - stores a best-effort offer record in Supabase
+- `takeOffer`:
+  - derives offer PDA
+  - builds and sends instruction
+  - marks offer as taken in Supabase (best-effort)
+
+On-chain transaction success is the source of truth. Supabase is used for app-level filtering/history UX.
+
+## UI Notes
+
+- Main tabs: `Offers` and `Transfer`
+- Offers activity views: `All`, `My Offers`, `Taken`
+- `All platforms` toggle:
+  - off: frontend-tracked offers
+  - on: full on-chain open offers
+- Clippy in the bottom-right enables nostalgic mode.
+
+## Troubleshooting
+
+- `Transaction rejected by wallet`: user declined signature.
+- `Insufficient balance`: wallet/token balance too low for requested amount.
+- `Transaction expired — please retry`: stale blockhash; retry action.
+- Empty offers list with `All platforms` off: verify Supabase schema/policies and recorded offer rows.
+- Missing token symbol/logo: fallback chain may not resolve metadata for that mint.
