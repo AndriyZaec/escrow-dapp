@@ -17,3 +17,9 @@ body {
 }
 
 @import "./styles/nostalgic.css";
+
+@media (max-width: 640px) {
+  .clippy-container {
+    display: none !important;
+  }
+}

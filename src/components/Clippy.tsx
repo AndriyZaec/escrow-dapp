@@ -81,7 +81,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
   const bubbleText = currentTip;
 
   return (
-    <div style={{ position: "fixed", bottom: 48, right: 48, zIndex: 50 }}>
+    <div className="clippy-container" style={{ position: "fixed", bottom: 48, right: 48, zIndex: 50 }}>
       {/* Speech bubble */}
       {bubbleOpen && (
         <div
