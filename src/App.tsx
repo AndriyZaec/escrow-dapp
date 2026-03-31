@@ -3,8 +3,10 @@ import { WalletButton } from "@/components/WalletButton";
 import { BalanceCards } from "@/components/BalanceCards";
 import { SendForm } from "@/components/SendForm";
 import { EscrowPanel } from "@/components/EscrowPanel";
+import { Clippy } from "@/components/Clippy";
 import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useBalance } from "@/hooks/useBalance";
+import { useNostalgicMode } from "@/hooks/useNostalgicMode";
 import { useWalletConnection } from "@solana/react-hooks";
 
 type Tab = "escrow" | "transfer";
@@ -12,10 +14,11 @@ type Tab = "escrow" | "transfer";
 export default function App() {
   const { connected } = useWalletConnection();
   const balances = useBalance();
+  const { nostalgic, enableNostalgic, disableNostalgic } = useNostalgicMode();
   const [tab, setTab] = useState<Tab>("escrow");
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className={`min-h-screen bg-slate-950${nostalgic ? " theme-98" : ""}`}>
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
@@ -28,7 +31,17 @@ export default function App() {
               Devnet
             </span>
           </div>
-          <WalletButton />
+          <div className="flex items-center gap-2">
+            {nostalgic && (
+              <button
+                onClick={disableNostalgic}
+                className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+              >
+                Back to Modern
+              </button>
+            )}
+            <WalletButton />
+          </div>
         </div>
       </header>
 
@@ -73,6 +86,8 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <Clippy nostalgic={nostalgic} onEnable={enableNostalgic} />
     </div>
   );
 }
