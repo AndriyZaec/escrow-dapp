@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const TIPS = [
+const SHARED_TIPS = [
   "Did you know? Solana can process 65,000 transactions per second!",
   "Pro tip: Always double-check the mint address before offering tokens.",
   "Welcome to EscrowDApp! Your trustless token exchange awaits.",
   "Fun fact: This escrow program closes the offer account when someone takes it.",
   "Clippy says: Don't forget to check your balances after a trade!",
   "I see you're swapping tokens. Would you like help with that?",
-  "The 90s called. They want their UI back. Oh wait...",
 ];
+
+const MODERN_TIPS = ["Tap on me if you want to shed a tear", ...SHARED_TIPS];
+const NOSTALGIC_TIPS = [...SHARED_TIPS, "The 90s called. They want their UI back. Oh wait..."];
 
 const TIP_SHOW_MS = 6000;
 const TIP_HIDE_MS = 10000;
@@ -19,31 +21,33 @@ interface ClippyProps {
 }
 
 export function Clippy({ nostalgic, onEnable }: ClippyProps) {
+  const tips = nostalgic ? NOSTALGIC_TIPS : MODERN_TIPS;
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const tipIndex = useRef(0);
-  const [currentTip, setCurrentTip] = useState(TIPS[0]);
+  const [currentTip, setCurrentTip] = useState(tips[0]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const nextTip = useCallback(() => {
-    tipIndex.current = (tipIndex.current + 1) % TIPS.length;
-    setCurrentTip(TIPS[tipIndex.current]);
-  }, []);
-
-  // Auto show/hide cycle in nostalgic mode
+  // Reset to first tip when switching modes
   useEffect(() => {
-    if (!nostalgic) return;
+    tipIndex.current = 0;
+    setCurrentTip(tips[0]);
+  }, [nostalgic, tips]);
 
+  const nextTip = useCallback(() => {
+    tipIndex.current = (tipIndex.current + 1) % tips.length;
+    setCurrentTip(tips[tipIndex.current]);
+  }, [tips]);
+
+  // Auto show/hide cycle — runs in both modes, starts with current tip
+  useEffect(() => {
     function cycle() {
-      // Show tip
-      nextTip();
       setBubbleOpen(true);
 
       timerRef.current = setTimeout(() => {
-        // Hide after TIP_SHOW_MS
         setBubbleOpen(false);
 
         timerRef.current = setTimeout(() => {
-          // Restart cycle after TIP_HIDE_MS
+          nextTip();
           cycle();
         }, TIP_HIDE_MS);
       }, TIP_SHOW_MS);
@@ -59,7 +63,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
     if (!nostalgic) {
       onEnable();
       tipIndex.current = 0;
-      setCurrentTip(TIPS[0]);
+      setCurrentTip(NOSTALGIC_TIPS[0]);
       setBubbleOpen(true);
       return;
     }
@@ -74,9 +78,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
     }
   }
 
-  const bubbleText = nostalgic
-    ? currentTip
-    : "Tap on me if you want to shed a tear";
+  const bubbleText = currentTip;
 
   return (
     <div style={{ position: "fixed", bottom: 48, right: 48, zIndex: 50 }}>
