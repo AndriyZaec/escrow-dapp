@@ -72,16 +72,6 @@
   font-size: 13px !important;
 }
 
-/* Checkbox — classic 98 look */
-.theme-98 input[type="checkbox"] {
-  appearance: auto !important;
-  width: 14px !important;
-  height: 14px !important;
-  border: 2px inset #c0c0c0 !important;
-  border-radius: 0 !important;
-  background: #fff !important;
-  cursor: pointer;
-}
 
 .theme-98 input::placeholder {
   color: #808080 !important;
