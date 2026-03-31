@@ -1,14 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const TIPS = [
-  'Did you know? Solana can process 65,000 transactions per second!',
-  'Pro tip: Always double-check the mint address before offering tokens.',
-  'Welcome to EscrowDApp! Your trustless token exchange awaits.',
-  'Remember: on-chain is the real guard. Supabase is just for convenience.',
-  'Fun fact: This escrow program closes the offer account when someone takes it.',
+  "Did you know? Solana can process 65,000 transactions per second!",
+  "Pro tip: Always double-check the mint address before offering tokens.",
+  "Welcome to EscrowDApp! Your trustless token exchange awaits.",
+  "Fun fact: This escrow program closes the offer account when someone takes it.",
   "Clippy says: Don't forget to check your balances after a trade!",
   "I see you're swapping tokens. Would you like help with that?",
-  'The 90s called. They want their UI back. Oh wait...',
+  "The 90s called. They want their UI back. Oh wait...",
 ];
 
 const TIP_SHOW_MS = 6000;
@@ -51,7 +50,9 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
     }
 
     cycle();
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [nostalgic, nextTip]);
 
   function handleClick() {
@@ -75,58 +76,54 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
 
   const bubbleText = nostalgic
     ? currentTip
-    : 'Tap on me if you want to shed a tear';
+    : "Tap on me if you want to shed a tear";
 
   return (
-    <div style={{ position: 'fixed', bottom: 48, right: 48, zIndex: 50 }}>
+    <div style={{ position: "fixed", bottom: 48, right: 48, zIndex: 50 }}>
       {/* Speech bubble */}
       {bubbleOpen && (
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 136,
             right: 0,
             width: 230,
-            padding: '10px 12px',
-            background: nostalgic ? '#ffffcc' : '#1e293b',
-            color: nostalgic ? '#000' : '#e2e8f0',
-            border: nostalgic ? '2px solid #000' : '1px solid #334155',
+            padding: "10px 12px",
+            background: nostalgic ? "#ffffcc" : "#1e293b",
+            color: nostalgic ? "#000" : "#e2e8f0",
+            border: nostalgic ? "2px solid #000" : "1px solid #334155",
             borderRadius: nostalgic ? 2 : 8,
             fontSize: 13,
             lineHeight: 1.4,
             boxShadow: nostalgic
-              ? '2px 2px 0 #000'
-              : '0 4px 12px rgba(0,0,0,0.3)',
+              ? "2px 2px 0 #000"
+              : "0 4px 12px rgba(0,0,0,0.3)",
           }}
         >
           {bubbleText}
           {/* Tail */}
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               bottom: -8,
               right: 52,
               width: 0,
               height: 0,
-              borderLeft: '8px solid transparent',
-              borderRight: '8px solid transparent',
-              borderTop: nostalgic
-                ? '8px solid #000'
-                : '8px solid #334155',
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderTop: nostalgic ? "8px solid #000" : "8px solid #334155",
             }}
           />
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               bottom: -6,
               right: 53,
               width: 0,
               height: 0,
-              borderLeft: '7px solid transparent',
-              borderRight: '7px solid transparent',
-              borderTop: nostalgic
-                ? '7px solid #ffffcc'
-                : '7px solid #1e293b',
+              borderLeft: "7px solid transparent",
+              borderRight: "7px solid transparent",
+              borderTop: nostalgic ? "7px solid #ffffcc" : "7px solid #1e293b",
             }}
           />
         </div>
@@ -135,27 +132,31 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
       {/* Clippy — no box, just the image */}
       <button
         onClick={handleClick}
-        title={nostalgic ? 'Click for a tip!' : 'Enter nostalgic mode'}
+        title={nostalgic ? "Click for a tip!" : "Enter nostalgic mode"}
         style={{
           width: 128,
           height: 128,
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
           padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          filter: nostalgic ? 'none' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))',
-          transition: 'transform 0.2s',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          filter: nostalgic ? "none" : "drop-shadow(0 2px 6px rgba(0,0,0,0.4))",
+          transition: "transform 0.2s",
         }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "scale(1.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "scale(1)";
+        }}
       >
         <img
           src="/clippy.png"
           alt="Clippy"
-          style={{ width: 120, height: 120, objectFit: 'contain' }}
+          style={{ width: 120, height: 120, objectFit: "contain" }}
         />
       </button>
     </div>

@@ -236,9 +236,9 @@ function OpenOffersList({
         </div>
       </CardHeader>
       <CardContent>
-        {/* Filters row: activity segments + source toggle */}
-        <div className="flex items-center gap-3 mb-3">
-          <TabsList className="flex-1">
+        {/* Filters */}
+        <div className="space-y-2 mb-3">
+          <TabsList>
             {ACTIVITY_OPTIONS.map(opt => (
               <TabsTrigger
                 key={opt.value}
@@ -250,17 +250,16 @@ function OpenOffersList({
             ))}
           </TabsList>
           {nostalgic ? (
-            <label className="flex items-center gap-1.5 text-xs cursor-pointer shrink-0">
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer">
               <input
                 type="checkbox"
                 checked={allPlatforms}
                 onChange={e => setAllPlatforms(e.target.checked)}
-                style={{ width: 14, height: 14 }}
               />
               All platforms
             </label>
           ) : (
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer shrink-0">
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
               <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
               All platforms
             </label>

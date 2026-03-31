@@ -173,12 +173,25 @@ export function useOffers() {
       if (activityFilter === 'mine' && walletAddress) {
         offersWithAmounts = offersWithAmounts.filter(o => String(o.maker) === walletAddress);
       } else if (activityFilter === 'taken' && walletAddress) {
+        // Taken offers are closed on-chain — build from Supabase data
         try {
-          const takenOffers = await fetchTakenByMe(walletAddress);
-          const takenPdas = new Set(takenOffers.map(o => o.pda));
-          offersWithAmounts = offersWithAmounts.filter(o => takenPdas.has(o.pda));
+          const takenRecords = await fetchTakenByMe(walletAddress);
+          offersWithAmounts = takenRecords.map(r => ({
+            pda: r.pda,
+            id: BigInt(r.offer_id),
+            maker: address(r.maker),
+            tokenMintA: address(r.mint_a),
+            tokenMintB: address(r.mint_b),
+            tokenBWantedAmount: BigInt(r.amount_b),
+            tokenAOfferedAmount: BigInt(r.amount_a),
+            decimalsA: mintDecimals.get(r.mint_a) ?? null,
+            decimalsB: mintDecimals.get(r.mint_b) ?? null,
+            symbolA: tokenList.get(r.mint_a)?.symbol ?? null,
+            symbolB: tokenList.get(r.mint_b)?.symbol ?? null,
+          }));
         } catch (e) {
           console.error('[useOffers] Taken filter failed:', e);
+          offersWithAmounts = [];
         }
       }
 
