@@ -37,6 +37,7 @@ export function useOffers() {
   const fetchOffers = useCallback(async (walletAddress?: string) => {
     setLoading(true);
     setError(null);
+    setOffers([]);
     setVisibleCount(PAGE_SIZE);
 
     try {
