@@ -23,6 +23,7 @@
     "@solana/kit": "^6.5.0",
     "@solana/react-hooks": "^1.4.1",
     "@supabase/supabase-js": "^2.49.1",
+    "98.css": "^0.1.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.487.0",

@@ -1,0 +1,172 @@
+/* Nostalgic mode — 98.css overrides scoped to .theme-98 */
+
+.theme-98 {
+  background: #008080 !important;
+  color: #000 !important;
+}
+
+/* Header → title bar */
+.theme-98 header {
+  background: linear-gradient(90deg, #000080, #1084d0) !important;
+  border-bottom: 2px outset #c0c0c0 !important;
+  backdrop-filter: none !important;
+}
+
+.theme-98 header span {
+  color: #fff !important;
+}
+
+.theme-98 header button {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+  font-family: 'Pixelated MS Sans Serif', Arial, sans-serif;
+  text-shadow: none !important;
+}
+
+.theme-98 header button:hover {
+  background: #dfdfdf !important;
+}
+
+.theme-98 header button:active {
+  border-style: inset !important;
+}
+
+/* Cards → windows */
+.theme-98 [class*="rounded-lg"][class*="border"][class*="bg-"] {
+  background: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+  color: #000 !important;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff;
+}
+
+/* Card headers */
+.theme-98 [class*="border-b"][class*="bg-slate"] {
+  background: linear-gradient(90deg, #000080, #1084d0) !important;
+  border-bottom: none !important;
+  color: #fff !important;
+}
+
+.theme-98 [class*="border-b"][class*="bg-slate"] * {
+  color: #fff !important;
+}
+
+/* Inputs → sunken */
+.theme-98 input,
+.theme-98 select,
+.theme-98 textarea {
+  background: #fff !important;
+  color: #000 !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+  font-family: 'Pixelated MS Sans Serif', Arial, sans-serif;
+}
+
+.theme-98 input::placeholder {
+  color: #808080 !important;
+}
+
+/* Buttons → 98-style */
+.theme-98 button:not([style]) {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+  font-family: 'Pixelated MS Sans Serif', Arial, sans-serif;
+  text-shadow: none !important;
+}
+
+.theme-98 button:not([style]):hover {
+  background: #dfdfdf !important;
+}
+
+.theme-98 button:not([style]):active {
+  border-style: inset !important;
+}
+
+.theme-98 button:not([style]):disabled {
+  color: #808080 !important;
+}
+
+/* Tabs → raised segments */
+.theme-98 [role="tablist"] {
+  background: #c0c0c0 !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+  padding: 2px !important;
+}
+
+.theme-98 [role="tab"] {
+  border-radius: 0 !important;
+  color: #000 !important;
+}
+
+.theme-98 [role="tab"][aria-selected="true"] {
+  background: #dfdfdf !important;
+  border: 1px outset #c0c0c0 !important;
+  color: #000 !important;
+}
+
+/* Badges */
+.theme-98 [class*="rounded-full"][class*="bg-slate-800"] {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0 !important;
+}
+
+/* Text overrides */
+.theme-98 p,
+.theme-98 span,
+.theme-98 label,
+.theme-98 div {
+  color: #000;
+}
+
+.theme-98 [class*="text-slate-400"],
+.theme-98 [class*="text-slate-500"],
+.theme-98 [class*="text-slate-600"] {
+  color: #404040 !important;
+}
+
+.theme-98 [class*="text-slate-100"],
+.theme-98 [class*="text-slate-200"],
+.theme-98 [class*="text-slate-300"] {
+  color: #000 !important;
+}
+
+/* Offer cards */
+.theme-98 [class*="bg-slate-900/50"] {
+  background: #d4d0c8 !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+}
+
+/* Scrollbar — classic look */
+.theme-98 ::-webkit-scrollbar {
+  width: 16px;
+}
+
+.theme-98 ::-webkit-scrollbar-track {
+  background: #c0c0c0;
+}
+
+.theme-98 ::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border: 2px outset #c0c0c0;
+}
+
+/* Activity filter segmented */
+.theme-98 [class*="bg-slate-800/60"] {
+  background: #c0c0c0 !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+}
+
+/* Switch in 98 mode */
+.theme-98 [role="switch"] {
+  border-radius: 0 !important;
+  border: 2px inset #c0c0c0 !important;
+}
