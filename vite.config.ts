@@ -12,4 +12,18 @@ export default defineConfig({
     },
   },
   define: { global: 'globalThis' },
+  build: {
+    rolldownOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/@solana') || id.includes('node_modules/@solana-program')) {
+            return 'vendor-solana';
+          }
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+        },
+      },
+    },
+  },
 });

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { WalletButton } from "@/components/WalletButton";
 import { BalanceCards } from "@/components/BalanceCards";
-import { SendForm } from "@/components/SendForm";
-import { EscrowPanel } from "@/components/EscrowPanel";
 import { Clippy } from "@/components/Clippy";
+
+const EscrowPanel = lazy(() => import("@/components/EscrowPanel").then(m => ({ default: m.EscrowPanel })));
+const SendForm = lazy(() => import("@/components/SendForm").then(m => ({ default: m.SendForm })));
 import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useBalance } from "@/hooks/useBalance";
 import { useNostalgicMode } from "@/hooks/useNostalgicMode";
@@ -71,12 +72,14 @@ export default function App() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent active={tab === "escrow"}>
-              <EscrowPanel balances={balances} nostalgic={nostalgic} />
-            </TabsContent>
-            <TabsContent active={tab === "transfer"}>
-              <SendForm balances={balances} />
-            </TabsContent>
+            <Suspense fallback={<div className="py-8 text-center text-sm text-slate-500">Loading…</div>}>
+              <TabsContent active={tab === "escrow"}>
+                <EscrowPanel balances={balances} nostalgic={nostalgic} />
+              </TabsContent>
+              <TabsContent active={tab === "transfer"}>
+                <SendForm balances={balances} />
+              </TabsContent>
+            </Suspense>
           </div>
         )}
 
