@@ -13,12 +13,14 @@ import { createClient } from '@supabase/supabase-js';
 //    offer_id   text    not null,
 //    tx_sig     text    not null,
 //    status     text    not null default 'open',
+//    taker      text,                          -- wallet that took the offer
 //    created_at timestamptz default now()
 //  );
 //
 //  -- Indexes on frequently-filtered columns (query-missing-indexes)
 //  create index if not exists offers_status_idx on offers (status);
 //  create index if not exists offers_maker_idx  on offers (maker);
+//  create index if not exists offers_taker_idx  on offers (taker);
 //
 //  -- RLS: this is public escrow data — anon role can read & write
 //  -- (on-chain validity is enforced by the Solana program, not Supabase)
@@ -50,6 +52,7 @@ export interface OfferRecord {
   offer_id: string;
   tx_sig: string;
   status: 'open' | 'taken';
+  taker?: string | null;
   created_at?: string;
 }
 
@@ -63,11 +66,11 @@ export async function saveOffer(
   if (error) throw new Error(`Failed to save offer: ${error.message}`);
 }
 
-/** Mark offer taken — uses indexed `pda` column for the lookup. */
-export async function markOfferTaken(pda: string): Promise<void> {
+/** Mark offer taken — stores taker address alongside status update. */
+export async function markOfferTaken(pda: string, taker: string): Promise<void> {
   const { error } = await supabase
     .from('offers')
-    .update({ status: 'taken' })
+    .update({ status: 'taken', taker })
     .eq('pda', pda);
   if (error) throw new Error(`Failed to mark offer taken: ${error.message}`);
 }
@@ -80,5 +83,27 @@ export async function fetchOpenOffersFromDb(): Promise<OfferRecord[]> {
     .eq('status', 'open')
     .order('created_at', { ascending: false });
   if (error) throw new Error(`Failed to fetch offers: ${error.message}`);
+  return (data ?? []) as OfferRecord[];
+}
+
+/** Fetch offers created by a specific wallet. */
+export async function fetchMyOffers(wallet: string): Promise<OfferRecord[]> {
+  const { data, error } = await supabase
+    .from('offers')
+    .select('*')
+    .eq('maker', wallet)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(`Failed to fetch my offers: ${error.message}`);
+  return (data ?? []) as OfferRecord[];
+}
+
+/** Fetch offers taken by a specific wallet. */
+export async function fetchTakenByMe(wallet: string): Promise<OfferRecord[]> {
+  const { data, error } = await supabase
+    .from('offers')
+    .select('*')
+    .eq('taker', wallet)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(`Failed to fetch taken offers: ${error.message}`);
   return (data ?? []) as OfferRecord[];
 }

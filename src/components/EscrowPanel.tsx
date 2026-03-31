@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { TxResult } from '@/components/TxResult';
 import { makeOffer, takeOffer } from '@/service';
-import { useOffers, type OnChainOffer } from '@/hooks/useOffers';
+import { useOffers, type OnChainOffer, type ActivityFilter } from '@/hooks/useOffers';
 import { classifyError } from '@/lib/execute';
 import { fetchMintDecimals } from '@/lib/rpc';
 import { truncateAddress, formatTokenAmount } from '@/lib/utils';
@@ -21,26 +21,36 @@ interface EscrowPanelProps {
 
 export function EscrowPanel({ balances }: EscrowPanelProps) {
   const { connected, wallet } = useWalletConnection();
-  const { offers, loading: offersLoading, error: offersError, fetchOffers, allPlatforms, setAllPlatforms } = useOffers();
+  const {
+    offers, loading: offersLoading, error: offersError, fetchOffers,
+    allPlatforms, setAllPlatforms, activityFilter, setActivityFilter,
+    loadMore, hasMore,
+  } = useOffers();
+
+  const walletAddress = wallet ? String(wallet.account.address) : undefined;
 
   useEffect(() => {
-    void fetchOffers();
-  }, [fetchOffers]);
+    void fetchOffers(walletAddress);
+  }, [fetchOffers, walletAddress]);
 
   if (!connected) return null;
 
   return (
     <div className="space-y-4">
-      <MakeOfferForm balances={balances} onSuccess={fetchOffers} wallet={wallet} />
+      <MakeOfferForm balances={balances} onSuccess={() => fetchOffers(walletAddress)} wallet={wallet} />
       <OpenOffersList
         offers={offers}
         loading={offersLoading}
         error={offersError}
-        onRefresh={fetchOffers}
+        onRefresh={() => fetchOffers(walletAddress)}
         wallet={wallet}
-        onTakeSuccess={() => { fetchOffers(); balances.refetch(); }}
+        onTakeSuccess={() => { fetchOffers(walletAddress); balances.refetch(); }}
         allPlatforms={allPlatforms}
         setAllPlatforms={setAllPlatforms}
+        activityFilter={activityFilter}
+        setActivityFilter={setActivityFilter}
+        loadMore={loadMore}
+        hasMore={hasMore}
       />
     </div>
   );
@@ -168,6 +178,12 @@ function MakeOfferForm({
 
 // ── Open Offers List ──────────────────────────────────────────────────────────
 
+const ACTIVITY_OPTIONS: { value: ActivityFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'mine', label: 'My Offers' },
+  { value: 'taken', label: 'Taken' },
+];
+
 function OpenOffersList({
   offers,
   loading,
@@ -177,6 +193,10 @@ function OpenOffersList({
   onTakeSuccess,
   allPlatforms,
   setAllPlatforms,
+  activityFilter,
+  setActivityFilter,
+  loadMore,
+  hasMore,
 }: {
   offers: OnChainOffer[];
   loading: boolean;
@@ -186,6 +206,10 @@ function OpenOffersList({
   onTakeSuccess: () => void;
   allPlatforms: boolean;
   setAllPlatforms: (v: boolean) => void;
+  activityFilter: ActivityFilter;
+  setActivityFilter: (v: ActivityFilter) => void;
+  loadMore: () => void;
+  hasMore: boolean;
 }) {
   return (
     <Card>
@@ -204,6 +228,23 @@ function OpenOffersList({
         </div>
       </CardHeader>
       <CardContent>
+        {/* Activity filter */}
+        <div className="inline-flex w-full rounded-lg bg-slate-800/60 p-1 mb-3">
+          {ACTIVITY_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setActivityFilter(opt.value)}
+              className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                activityFilter === opt.value
+                  ? 'bg-slate-700 text-slate-100 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
         {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
 
         {!loading && offers.length === 0 && (
@@ -220,6 +261,12 @@ function OpenOffersList({
             />
           ))}
         </div>
+
+        {hasMore && (
+          <Button variant="ghost" className="w-full mt-3" onClick={loadMore}>
+            Load more
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

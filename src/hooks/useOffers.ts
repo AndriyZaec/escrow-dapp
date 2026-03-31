@@ -2,10 +2,13 @@ import { useState, useCallback } from 'react';
 import { address, getBase58Codec, type Address, type Base58EncodedBytes } from '@solana/kit';
 import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, fetchAllMaybeToken, fetchAllMaybeMint } from '@solana-program/token';
 import { rpc } from '@/lib/rpc';
-import { fetchOpenOffersFromDb } from '@/lib/supabase';
+import { fetchOpenOffersFromDb, fetchMyOffers, fetchTakenByMe } from '@/lib/supabase';
 import { getTokenList } from '@/lib/helius';
 import { decodeOffer, OFFER_DISCRIMINATOR } from '@generated/accounts/offer';
 import { ESCROW_PROGRAM_ADDRESS } from '@generated/programs/escrow';
+
+export type ActivityFilter = 'all' | 'mine' | 'taken';
+const PAGE_SIZE = 10;
 
 export interface OnChainOffer {
   pda: string;
@@ -23,13 +26,17 @@ export interface OnChainOffer {
 
 export function useOffers() {
   const [offers, setOffers] = useState<OnChainOffer[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allPlatforms, setAllPlatforms] = useState(false);
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
 
-  const fetchOffers = useCallback(async () => {
+  const fetchOffers = useCallback(async (walletAddress?: string) => {
     setLoading(true);
     setError(null);
+    setVisibleCount(PAGE_SIZE);
 
     try {
       // Encode discriminator to base58 for the memcmp filter
@@ -162,6 +169,20 @@ export function useOffers() {
         }
       }
 
+      // Activity filter
+      if (activityFilter === 'mine' && walletAddress) {
+        offersWithAmounts = offersWithAmounts.filter(o => String(o.maker) === walletAddress);
+      } else if (activityFilter === 'taken' && walletAddress) {
+        try {
+          const takenOffers = await fetchTakenByMe(walletAddress);
+          const takenPdas = new Set(takenOffers.map(o => o.pda));
+          offersWithAmounts = offersWithAmounts.filter(o => takenPdas.has(o.pda));
+        } catch (e) {
+          console.error('[useOffers] Taken filter failed:', e);
+        }
+      }
+
+      setTotalCount(offersWithAmounts.length);
       setOffers(offersWithAmounts);
     } catch (e) {
       console.error('[useOffers] fetchOffers failed:', e);
@@ -169,7 +190,25 @@ export function useOffers() {
     } finally {
       setLoading(false);
     }
-  }, [allPlatforms]);
+  }, [allPlatforms, activityFilter]);
 
-  return { offers, loading, error, fetchOffers, allPlatforms, setAllPlatforms };
+  const loadMore = useCallback(() => {
+    setVisibleCount(prev => prev + PAGE_SIZE);
+  }, []);
+
+  const hasMore = visibleCount < totalCount;
+  const visibleOffers = offers.slice(0, visibleCount);
+
+  return {
+    offers: visibleOffers,
+    loading,
+    error,
+    fetchOffers,
+    allPlatforms,
+    setAllPlatforms,
+    activityFilter,
+    setActivityFilter,
+    loadMore,
+    hasMore,
+  };
 }

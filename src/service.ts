@@ -77,7 +77,7 @@ export async function takeOffer(
 
   // Mark taken in Supabase (best-effort)
   try {
-    await markOfferTaken(offer.pda);
+    await markOfferTaken(offer.pda, String(signer.address));
   } catch (e) {
     console.warn("Supabase update failed (offer is taken on-chain):", e);
   }
