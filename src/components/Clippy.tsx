@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 const TIPS = [
   'Did you know? Solana can process 65,000 transactions per second!',
@@ -11,6 +11,9 @@ const TIPS = [
   'The 90s called. They want their UI back. Oh wait...',
 ];
 
+const TIP_SHOW_MS = 6000;
+const TIP_HIDE_MS = 10000;
+
 interface ClippyProps {
   nostalgic: boolean;
   onEnable: () => void;
@@ -20,6 +23,36 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const tipIndex = useRef(0);
   const [currentTip, setCurrentTip] = useState(TIPS[0]);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const nextTip = useCallback(() => {
+    tipIndex.current = (tipIndex.current + 1) % TIPS.length;
+    setCurrentTip(TIPS[tipIndex.current]);
+  }, []);
+
+  // Auto show/hide cycle in nostalgic mode
+  useEffect(() => {
+    if (!nostalgic) return;
+
+    function cycle() {
+      // Show tip
+      nextTip();
+      setBubbleOpen(true);
+
+      timerRef.current = setTimeout(() => {
+        // Hide after TIP_SHOW_MS
+        setBubbleOpen(false);
+
+        timerRef.current = setTimeout(() => {
+          // Restart cycle after TIP_HIDE_MS
+          cycle();
+        }, TIP_HIDE_MS);
+      }, TIP_SHOW_MS);
+    }
+
+    cycle();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [nostalgic, nextTip]);
 
   function handleClick() {
     if (!nostalgic) {
@@ -30,11 +63,12 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
       return;
     }
 
+    // Manual toggle — reset auto-cycle
+    if (timerRef.current) clearTimeout(timerRef.current);
     if (bubbleOpen) {
       setBubbleOpen(false);
     } else {
-      tipIndex.current = (tipIndex.current + 1) % TIPS.length;
-      setCurrentTip(TIPS[tipIndex.current]);
+      nextTip();
       setBubbleOpen(true);
     }
   }
@@ -44,15 +78,15 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
     : 'Tap on me if you want to shed a tear';
 
   return (
-    <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 50 }}>
+    <div style={{ position: 'fixed', bottom: 28, right: 32, zIndex: 50 }}>
       {/* Speech bubble */}
       {bubbleOpen && (
         <div
           style={{
             position: 'absolute',
-            bottom: 56,
+            bottom: 80,
             right: 0,
-            width: 220,
+            width: 230,
             padding: '10px 12px',
             background: nostalgic ? '#ffffcc' : '#1e293b',
             color: nostalgic ? '#000' : '#e2e8f0',
@@ -71,6 +105,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
               onClick={e => {
                 e.stopPropagation();
                 setBubbleOpen(false);
+                if (timerRef.current) clearTimeout(timerRef.current);
               }}
               style={{
                 position: 'absolute',
@@ -92,7 +127,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
             style={{
               position: 'absolute',
               bottom: -8,
-              right: 18,
+              right: 22,
               width: 0,
               height: 0,
               borderLeft: '8px solid transparent',
@@ -106,7 +141,7 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
             style={{
               position: 'absolute',
               bottom: -6,
-              right: 19,
+              right: 23,
               width: 0,
               height: 0,
               borderLeft: '7px solid transparent',
@@ -119,28 +154,31 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
         </div>
       )}
 
-      {/* Clippy button */}
+      {/* Clippy — no box, just the image */}
       <button
         onClick={handleClick}
         title={nostalgic ? 'Click for a tip!' : 'Enter nostalgic mode'}
         style={{
-          width: 52,
-          height: 52,
-          borderRadius: nostalgic ? 0 : 12,
-          border: nostalgic ? '2px outset #c0c0c0' : '1px solid #334155',
-          background: nostalgic ? '#c0c0c0' : '#1e293b',
+          width: 72,
+          height: 72,
+          background: 'transparent',
+          border: 'none',
           cursor: 'pointer',
+          padding: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 4,
-          boxShadow: nostalgic
-            ? 'inset -1px -1px #0a0a0a, inset 1px 1px #fff'
-            : '0 2px 8px rgba(0,0,0,0.3)',
-          transition: 'all 0.2s',
+          filter: nostalgic ? 'none' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))',
+          transition: 'transform 0.2s',
         }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
       >
-        <img src="/clippy.png" alt="Clippy" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+        <img
+          src="/clippy.png"
+          alt="Clippy"
+          style={{ width: 64, height: 64, objectFit: 'contain' }}
+        />
       </button>
     </div>
   );

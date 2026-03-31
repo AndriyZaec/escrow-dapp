@@ -12,6 +12,11 @@
   backdrop-filter: none !important;
 }
 
+/* Hide gradient circle logo in nostalgic mode */
+.theme-98 header .rounded-full.bg-gradient-to-br {
+  display: none !important;
+}
+
 .theme-98 header span {
   color: #fff !important;
 }
@@ -53,7 +58,7 @@
   color: #fff !important;
 }
 
-/* Inputs → sunken */
+/* Inputs → sunken, consistent height */
 .theme-98 input,
 .theme-98 select,
 .theme-98 textarea {
@@ -62,6 +67,9 @@
   border: 2px inset #c0c0c0 !important;
   border-radius: 0 !important;
   font-family: 'Pixelated MS Sans Serif', Arial, sans-serif;
+  height: 28px !important;
+  padding: 2px 6px !important;
+  font-size: 13px !important;
 }
 
 .theme-98 input::placeholder {

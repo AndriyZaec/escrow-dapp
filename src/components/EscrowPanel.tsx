@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { TxResult } from '@/components/TxResult';
+import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { makeOffer, takeOffer } from '@/service';
 import { useOffers, type OnChainOffer, type ActivityFilter } from '@/hooks/useOffers';
 import { classifyError } from '@/lib/execute';
@@ -17,9 +18,10 @@ import type { Balances } from '@/hooks/useBalance';
 
 interface EscrowPanelProps {
   balances: Balances;
+  nostalgic?: boolean;
 }
 
-export function EscrowPanel({ balances }: EscrowPanelProps) {
+export function EscrowPanel({ balances, nostalgic = false }: EscrowPanelProps) {
   const { connected, wallet } = useWalletConnection();
   const {
     offers, loading: offersLoading, error: offersError, fetchOffers,
@@ -51,6 +53,7 @@ export function EscrowPanel({ balances }: EscrowPanelProps) {
         setActivityFilter={setActivityFilter}
         loadMore={loadMore}
         hasMore={hasMore}
+        nostalgic={nostalgic}
       />
     </div>
   );
@@ -198,6 +201,7 @@ function OpenOffersList({
   setActivityFilter,
   loadMore,
   hasMore,
+  nostalgic,
 }: {
   offers: OnChainOffer[];
   loading: boolean;
@@ -211,6 +215,7 @@ function OpenOffersList({
   setActivityFilter: (v: ActivityFilter) => void;
   loadMore: () => void;
   hasMore: boolean;
+  nostalgic: boolean;
 }) {
   const emptyMessage = activityFilter === 'mine'
     ? 'You haven\u2019t created any offers yet'
@@ -233,25 +238,33 @@ function OpenOffersList({
       <CardContent>
         {/* Filters row: activity segments + source toggle */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="inline-flex flex-1 rounded-lg bg-slate-800/60 p-1">
+          <TabsList className="flex-1">
             {ACTIVITY_OPTIONS.map(opt => (
-              <button
+              <TabsTrigger
                 key={opt.value}
+                active={activityFilter === opt.value}
                 onClick={() => setActivityFilter(opt.value)}
-                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
-                  activityFilter === opt.value
-                    ? 'bg-slate-700 text-slate-100 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-300'
-                }`}
               >
                 {opt.label}
-              </button>
+              </TabsTrigger>
             ))}
-          </div>
-          <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer shrink-0">
-            <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
-            All platforms
-          </label>
+          </TabsList>
+          {nostalgic ? (
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={allPlatforms}
+                onChange={e => setAllPlatforms(e.target.checked)}
+                style={{ width: 14, height: 14 }}
+              />
+              All platforms
+            </label>
+          ) : (
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer shrink-0">
+              <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
+              All platforms
+            </label>
+          )}
         </div>
 
         {error && <p className="text-xs text-red-400 mb-2">{error}</p>}

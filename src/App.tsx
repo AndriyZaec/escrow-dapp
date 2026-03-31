@@ -69,7 +69,7 @@ export default function App() {
             </TabsList>
 
             <TabsContent active={tab === "escrow"}>
-              <EscrowPanel balances={balances} />
+              <EscrowPanel balances={balances} nostalgic={nostalgic} />
             </TabsContent>
             <TabsContent active={tab === "transfer"}>
               <SendForm balances={balances} />
