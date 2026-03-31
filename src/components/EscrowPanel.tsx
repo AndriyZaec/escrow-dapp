@@ -184,6 +184,7 @@ const ACTIVITY_OPTIONS: { value: ActivityFilter; label: string }[] = [
   { value: 'taken', label: 'Taken' },
 ];
 
+
 function OpenOffersList({
   offers,
   loading,
@@ -211,44 +212,52 @@ function OpenOffersList({
   loadMore: () => void;
   hasMore: boolean;
 }) {
+  const emptyMessage = activityFilter === 'mine'
+    ? 'You haven\u2019t created any offers yet'
+    : activityFilter === 'taken'
+      ? 'You haven\u2019t taken any offers yet'
+      : allPlatforms
+        ? 'No open offers on-chain'
+        : 'No open offers from EscrowDApp';
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between w-full">
           <CardTitle>Open Offers</CardTitle>
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
-              <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
-              All platforms
-            </label>
-            <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
-              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Refresh'}
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading}>
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Refresh'}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Activity filter */}
-        <div className="inline-flex w-full rounded-lg bg-slate-800/60 p-1 mb-3">
-          {ACTIVITY_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setActivityFilter(opt.value)}
-              className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
-                activityFilter === opt.value
-                  ? 'bg-slate-700 text-slate-100 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-300'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        {/* Filters row: activity segments + source toggle */}
+        <div className="flex items-center gap-3 mb-3">
+          <div className="inline-flex flex-1 rounded-lg bg-slate-800/60 p-1">
+            {ACTIVITY_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setActivityFilter(opt.value)}
+                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                  activityFilter === opt.value
+                    ? 'bg-slate-700 text-slate-100 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer shrink-0">
+            <Switch checked={allPlatforms} onCheckedChange={setAllPlatforms} />
+            All platforms
+          </label>
         </div>
 
         {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
 
         {!loading && offers.length === 0 && (
-          <p className="text-xs text-slate-600 py-4 text-center">No open offers found</p>
+          <p className="text-xs text-slate-600 py-4 text-center">{emptyMessage}</p>
         )}
 
         <div className="space-y-2">
