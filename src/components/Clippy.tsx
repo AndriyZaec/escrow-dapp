@@ -1,5 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
+const CLIPPY_GIFS = [
+  "https://media.tenor.com/uA5JZjh_ofsAAAAi/clippy.gif",
+  "https://media.tenor.com/KbPESUov9hcAAAAi/clippy.gif",
+  "https://media.tenor.com/7LcaZrg95ZIAAAAi/clippy.gif",
+  "https://media.tenor.com/cceueTeJSjoAAAAi/clippy.gif",
+  "https://media.tenor.com/x10tu93AnNQAAAAi/clippy.gif",
+  "https://media.tenor.com/Tmu1IbKTtosAAAAi/clippy.gif",
+];
+
 const SHARED_TIPS = [
   "Did you know? Solana can process 65,000 transactions per second!",
   "Pro tip: Always double-check the mint address before offering tokens.",
@@ -15,6 +24,15 @@ const NOSTALGIC_TIPS = [...SHARED_TIPS, "The 90s called. They want their UI back
 const TIP_SHOW_MS = 6000;
 const TIP_HIDE_MS = 10000;
 
+function pickNextGif(currentIndex: number): number {
+  if (CLIPPY_GIFS.length <= 1) return 0;
+  let next: number;
+  do {
+    next = Math.floor(Math.random() * CLIPPY_GIFS.length);
+  } while (next === currentIndex);
+  return next;
+}
+
 interface ClippyProps {
   nostalgic: boolean;
   onEnable: () => void;
@@ -25,6 +43,8 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const tipIndex = useRef(0);
   const [currentTip, setCurrentTip] = useState(tips[0]);
+  const gifIndex = useRef(Math.floor(Math.random() * CLIPPY_GIFS.length));
+  const [currentGif, setCurrentGif] = useState(CLIPPY_GIFS[gifIndex.current]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Reset to first tip when switching modes
@@ -36,6 +56,8 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
   const nextTip = useCallback(() => {
     tipIndex.current = (tipIndex.current + 1) % tips.length;
     setCurrentTip(tips[tipIndex.current]);
+    gifIndex.current = pickNextGif(gifIndex.current);
+    setCurrentGif(CLIPPY_GIFS[gifIndex.current]);
   }, [tips]);
 
   // Auto show/hide cycle — runs in both modes, starts with current tip
@@ -81,13 +103,13 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
   const bubbleText = currentTip;
 
   return (
-    <div className="clippy-container" style={{ position: "fixed", bottom: 48, right: 48, zIndex: 50 }}>
+    <div className="clippy-container" style={{ position: "fixed", bottom: 64, right: 64, zIndex: 50 }}>
       {/* Speech bubble */}
       {bubbleOpen && (
         <div
           style={{
             position: "absolute",
-            bottom: 136,
+            bottom: 158,
             right: 0,
             width: 230,
             padding: "10px 12px",
@@ -131,13 +153,13 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
         </div>
       )}
 
-      {/* Clippy — no box, just the image */}
+      {/* Clippy — animated GIF when bubble is open, static when idle */}
       <button
         onClick={handleClick}
         title={nostalgic ? "Click for a tip!" : "Enter nostalgic mode"}
         style={{
-          width: 128,
-          height: 128,
+          width: 150,
+          height: 150,
           background: "transparent",
           border: "none",
           cursor: "pointer",
@@ -156,9 +178,9 @@ export function Clippy({ nostalgic, onEnable }: ClippyProps) {
         }}
       >
         <img
-          src="/clippy.png"
+          src={bubbleOpen ? currentGif : "/clippy.png"}
           alt="Clippy"
-          style={{ width: 120, height: 120, objectFit: "contain" }}
+          style={{ width: 140, height: 140, objectFit: "contain" }}
         />
       </button>
     </div>

@@ -39,7 +39,7 @@ export default function App() {
             {nostalgic && (
               <button
                 onClick={disableNostalgic}
-                className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+                className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 transition-colors"
               >
                 Back to Modern
               </button>
