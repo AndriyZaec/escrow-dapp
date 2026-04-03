@@ -4,6 +4,23 @@ A Vite + React + TypeScript frontend for creating and taking escrow offers on So
 
 This app integrates wallet connection, SOL/SPL transfers, on-chain offer discovery, Supabase-backed activity/history, and a nostalgic `98.css` theme mode.
 
+## Devnet Transactions
+
+**Wallet:** `GypW2MpEy1LrGTtZKPGauzJ9E5qioy16fjJzWamaUFsW`
+
+| Action | Transaction |
+| --- | --- |
+| `make_offer` | [2PuPD4W...gZWr](https://explorer.solana.com/tx/2PuPD4WCjiuU2HxHwjfKdUypfCasRQgvX57LgNimtyRGZWYqmCU3PBDJeNLJHSaDM7jK9UbQPu1eNsAcFY3UgZWr?cluster=devnet) |
+| `take_offer` | [5KDtSp8...fS5](https://explorer.solana.com/tx/5KDtSp8RuHAr5YKzxH14MEW4y5nnUbSapB37P5rdoKLopK5rRAmzrwt2Ntq23oKEyFRBaRVqD5EaERWwgWvt7fS5?cluster=devnet) |
+
+## Tested Wallets
+
+- [Phantom](https://phantom.app/) (primary, all flows verified)
+- [Backpack](https://backpack.app/)
+- [Solflare](https://solflare.com/)
+
+Any wallet supporting the [Wallet Standard](https://github.com/wallet-standard/wallet-standard) should work via auto-discovery.
+
 ## Features
 
 - Wallet connection via auto-discovered connectors (Phantom, Backpack, Solflare, and others supported by wallet standard).
